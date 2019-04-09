@@ -42,7 +42,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>Set IP</string>
+     <string>Set</string>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButtonStart">
@@ -117,7 +117,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>Set Port</string>
+     <string>Set</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_serverPort">
@@ -145,22 +145,6 @@
  </widget>
  <resources/>
  <connections>
-  <connection>
-   <sender>pushButtonStart</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>upload()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>330</x>
-     <y>96</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>340</x>
-     <y>150</y>
-    </hint>
-   </hints>
-  </connection>
   <connection>
    <sender>pushButtonStart</sender>
    <signal>clicked()</signal>

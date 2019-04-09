@@ -1,7 +1,6 @@
 import os
 import sys
 import socket
-import struct
 
 import message
 from message import Message
@@ -9,8 +8,6 @@ from message import Message
 from message_header import Header
 from message_body import BodyData
 from message_body import BodyRequest
-from message_body import BodyResponse
-from message_body import BodyResult
 
 from message_util import MessageUtil
 

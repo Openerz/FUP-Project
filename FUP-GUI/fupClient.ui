@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>441</width>
-    <height>381</height>
+    <width>491</width>
+    <height>161</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -35,40 +35,22 @@
    <widget class="QPushButton" name="pushButtonIP">
     <property name="geometry">
      <rect>
-      <x>340</x>
+      <x>390</x>
       <y>10</y>
       <width>91</width>
       <height>31</height>
      </rect>
     </property>
     <property name="text">
-     <string>Set IP</string>
+     <string>Set</string>
     </property>
-   </widget>
-   <widget class="QTreeWidget" name="flieList">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>130</y>
-      <width>421</width>
-      <height>201</height>
-     </rect>
-    </property>
-    <property name="acceptDrops">
-     <bool>false</bool>
-    </property>
-    <column>
-     <property name="text">
-      <string notr="true">1</string>
-     </property>
-    </column>
    </widget>
    <widget class="QPushButton" name="pushButtonUpload">
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>340</y>
-      <width>421</width>
+      <y>120</y>
+      <width>471</width>
       <height>31</height>
      </rect>
     </property>
@@ -133,27 +115,37 @@
    <widget class="QPushButton" name="pushButtonPort">
     <property name="geometry">
      <rect>
-      <x>340</x>
+      <x>390</x>
       <y>50</y>
       <width>91</width>
       <height>31</height>
      </rect>
     </property>
     <property name="text">
-     <string>Set Port</string>
+     <string>Set</string>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButtonFile">
     <property name="geometry">
      <rect>
-      <x>10</x>
+      <x>390</x>
       <y>90</y>
-      <width>421</width>
-      <height>31</height>
+      <width>91</width>
+      <height>21</height>
      </rect>
     </property>
     <property name="text">
-     <string>File..</string>
+     <string>Open file</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineEdit_file">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>91</y>
+      <width>371</width>
+      <height>20</height>
+     </rect>
     </property>
    </widget>
   </widget>
@@ -168,11 +160,11 @@
    <hints>
     <hint type="sourcelabel">
      <x>417</x>
-     <y>366</y>
+     <y>146</y>
     </hint>
     <hint type="destinationlabel">
      <x>435</x>
-     <y>299</y>
+     <y>160</y>
     </hint>
    </hints>
   </connection>
@@ -183,7 +175,7 @@
    <slot>setIP()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>360</x>
+     <x>410</x>
      <y>35</y>
     </hint>
     <hint type="destinationlabel">
@@ -215,12 +207,28 @@
    <slot>setFile()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>198</x>
+     <x>480</x>
      <y>109</y>
     </hint>
     <hint type="destinationlabel">
      <x>205</x>
      <y>73</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButtonFile</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>openFile()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>429</x>
+     <y>96</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>384</x>
+     <y>85</y>
     </hint>
    </hints>
   </connection>
@@ -230,5 +238,6 @@
   <slot>setIP()</slot>
   <slot>setPort()</slot>
   <slot>setFile()</slot>
+  <slot>openFile()</slot>
  </slots>
 </ui>

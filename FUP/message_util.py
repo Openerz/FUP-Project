@@ -1,5 +1,3 @@
-import socket
-
 import message
 from message import Message
 from message_header import Header
