@@ -18,8 +18,8 @@ class MessageUtil:
     @staticmethod
     def receive(sock):
         totalRecv = 0
-        sizeToRead = 16  # 헤더의 크기
-        hBuffer = bytes()  # 헤더 버퍼
+        sizeToRead = 16  # Header Size
+        hBuffer = bytes()  # Header Buffer
 
         # 헤더 읽기
         while sizeToRead > 0:  # 첫 반복문에서는 스트림으로부터 메세지 헤더의 경계를 끊어낸다.
@@ -37,7 +37,7 @@ class MessageUtil:
         bBuffer = bytes()
         sizeToRead = header.BODYLEN
 
-        while sizeToRead > 0:  # 첫 반복문에서 얻은 헤더에서 본문의 길이를 뽑아내어 그 길이만큼 다시 스트림으로부터 본문을 읽는다.
+        while sizeToRead > 0:  # Find out the length of the text in the header got from the first loop and read it back from the stream as long as it is.
             buffer = sock.recv(sizeToRead)
             if len(buffer) == 0:
                 return None

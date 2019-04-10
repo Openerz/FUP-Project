@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>491</width>
-    <height>161</height>
+    <height>331</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -147,6 +147,41 @@
       <height>20</height>
      </rect>
     </property>
+    <property name="readOnly">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>160</y>
+      <width>51</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Log</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QTextEdit" name="textLog">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>180</y>
+      <width>471</width>
+      <height>141</height>
+     </rect>
+    </property>
+    <property name="readOnly">
+     <bool>true</bool>
+    </property>
    </widget>
   </widget>
  </widget>
@@ -159,12 +194,12 @@
    <slot>upload()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>417</x>
+     <x>380</x>
      <y>146</y>
     </hint>
     <hint type="destinationlabel">
      <x>435</x>
-     <y>160</y>
+     <y>159</y>
     </hint>
    </hints>
   </connection>
@@ -204,22 +239,6 @@
    <sender>pushButtonFile</sender>
    <signal>clicked()</signal>
    <receiver>MainWindow</receiver>
-   <slot>setFile()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>480</x>
-     <y>109</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>205</x>
-     <y>73</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>pushButtonFile</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
    <slot>openFile()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -237,7 +256,6 @@
   <slot>upload()</slot>
   <slot>setIP()</slot>
   <slot>setPort()</slot>
-  <slot>setFile()</slot>
   <slot>openFile()</slot>
  </slots>
 </ui>

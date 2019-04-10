@@ -3,7 +3,7 @@ import message
 import struct
 
 
-class BodyRequest(ISerializable):  # 파일 전송 요청 메세지(0x01)에 사용할 본문 클래스이다. FILESIZE와 FILENAME 데이터 속성을 갖는다.
+class BodyRequest(ISerializable):  # The file transfer request message (0x01) class. It has FILESIZE and FILENAME data properties.
     def __init__(self, buffer):
         if buffer != None:
             slen = len(buffer)
@@ -11,7 +11,7 @@ class BodyRequest(ISerializable):  # 파일 전송 요청 메세지(0x01)에 사
             # 1 unsigned long long, N character
             self.struct_fmt = str.format('=Q{0}s', slen - 8)
             self.struct_len = struct.calcsize(self.struct_fmt)
-            if slen > 4:  # unsigned long long의 크기
+            if slen > 4:  # unsigned long long
                 slen = slen - 4
             else:
                 slen = 0
@@ -50,7 +50,7 @@ class BodyRequest(ISerializable):  # 파일 전송 요청 메세지(0x01)에 사
 
 
 class BodyResponse(
-    ISerializable):  # 파일 전송 요청에 대한 응답 메세지(0x02)에 사용할 본문 클래스이다. 요청 메세지의 MSGID와 수락 여부를 나타내는 RESPONSE 데이터 속성을 갖는다.
+    ISerializable):  # Class (0x02) in response to file transfer requests. Has the RESPONSE data property indicating the MSGID and acceptance of the request message.
     def __init__(self, buffer):
 
         # 1 unsigned int, Byte
@@ -78,7 +78,7 @@ class BodyResponse(
         return self.struct_len
 
 
-class BodyData(ISerializable):  # 실제 파일을 전송하는 메세지(0x03)에 사용할 본문 클래스이다. 앞서 프로토콜 정의에서 언급되었던 것처럼 DATA 필드만 갖고 있다.
+class BodyData(ISerializable):  # The message (0x03) class that transmits the actual file. As previously mentioned in the protocol definition, only the DATA field is present.
     def __init__(self, buffer):
         if buffer != None:
             self.DATA = buffer
@@ -91,7 +91,7 @@ class BodyData(ISerializable):  # 실제 파일을 전송하는 메세지(0x03)�
 
 
 class BodyResult(
-    ISerializable):  # 파일 전송 결과 메세지, 메세지(0x04)에 사용할 본문 클래스이다. 요청 메세지의 MSGID와 성공 여부를 나타내는 RESULT 데이터 속성을 갖는다.
+    ISerializable):  # File transfer result message, class (0x04). Has the MSGID of the request message and RESULT data property indicating success.
     def __init__(self, buffer):
 
         # 1 unsigned int, Byte
