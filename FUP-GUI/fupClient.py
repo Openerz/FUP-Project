@@ -56,7 +56,7 @@ class FupClient(QMainWindow):
 
         for i in tmp: # Replace '/' with '\\'
             if i == '/':
-                tmp[k] = '\\\\'
+                tmp[k] = '\\'
             k += 1
         for i in tmp:
             fName += (str(i))
@@ -69,25 +69,25 @@ class FupClient(QMainWindow):
         t.start()
 
     def clientStart(self, bindIP, bindPort, bindpath):
-        global serverPort, filepath
-        serverIp = bindIP
-        serverPort = bindPort
-        filepath = bindpath
+        global CHUNK_SIZE
+        startIP = bindIP
+        startPort = bindPort
+        startPath = bindpath
 
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # Create a TCP socket
 
         try:
-            self.textLog.append('Server: {0}:{1}\n'.format(serverIp, serverPort))
+            self.textLog.append('Server: {0}:{1}\n'.format(startIP, startPort))
             self.textLog.moveCursor(QTextCursor.End)
 
-            sock.connect((serverIp, serverPort))  # Accept Connection Request
+            sock.connect((startIP, startPort))  # Accept Connection Request
 
             msgId = 0
             reqMsg = Message()
-            filesize = os.path.getsize(filepath)
+            filesize = os.path.getsize(startPath)
             reqMsg.Body = BodyRequest(None)
             reqMsg.Body.FILESIZE = filesize
-            reqMsg.Body.FILENAME = filepath[filepath.rindex('\\') + 1:]
+            reqMsg.Body.FILENAME = startPath[startPath.rindex('\\') + 1:]
 
             msgId += 1
             reqMsg.Header = Header(None)
@@ -111,7 +111,7 @@ class FupClient(QMainWindow):
                 self.textLog.moveCursor(QTextCursor.End)
                 exit(0)
 
-            with open(filepath, 'rb') as file:  # Prepare to open the file and send it to the server.
+            with open(startPath, 'rb') as file:  # Prepare to open the file and send it to the server.
                 totalRead = 0
                 msgSeq = 0  # ushort
                 fragmented = 0  # byte
@@ -158,7 +158,8 @@ class FupClient(QMainWindow):
             self.textLog.moveCursor(QTextCursor.End)
 
         sock.close()
-        print("The client finished.")
+        self.textLog.append('The client finished.\n')
+        self.textLog.moveCursor(QTextCursor.End)
 
 app = QApplication(sys.argv)
 ex = FupClient()

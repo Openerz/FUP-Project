@@ -16,7 +16,7 @@ from PyQt5.QtGui import QTextCursor
 from PyQt5.QtWidgets import QApplication, QMainWindow, QInputDialog, QMessageBox, QFileDialog
 from PyQt5 import uic
 
-CHUNK_SIZE = 4096
+FileReceiveHandler = socketserver.BaseRequestHandler
 serverPort = 8080
 serverIP = '127.0.0.1'
 upload_dir = ''
@@ -63,9 +63,13 @@ class fupServer(QMainWindow):
 
     def saveFile(self):
         global upload_dir
-        fname = QFileDialog.getExistingDirectory(self)
-        self.lineEdit_file.setText(fname)
-        upload_dir = fname[0]
+        try:
+            fname = QFileDialog.getExistingDirectory(self)
+            self.lineEdit_file.setText(fname)
+            upload_dir = fname
+        except Exception as err:
+            self.textLog.append('Exception has occurred.\n{0}\n'.format(err))
+            self.textLog.moveCursor(QTextCursor.End)
 
 # class FileReceiveHandler(QMainWindow, socketserver.BaseRequestHandler):
     def handle(self):
@@ -184,24 +188,23 @@ class fupServer(QMainWindow):
             self.textLog.moveCursor(QTextCursor.End)
             client.close()
 
-    def serverStart(self, server, bindIP, bindPort):
-        global upload_dir
-
+    def serverStart(self, bindDir, bindIP, bindPort):
+        upload_Dir = bindDir
+        uploadIP = bindIP
+        uploadPort = bindPort
         try:
-            if os.path.isdir(upload_dir) == 0:
-                os.mkdir(upload_dir)
+            if os.path.isdir(upload_Dir) == 0:
+                os.mkdir(upload_Dir)
         except OSError as err:
             self.textLog.append('Exception has occurred.\n{0}\n'.format(err))
             self.textLog.moveCursor(QTextCursor.End)
             pass
 
-        server = None
+        server = 0
 
         try:
-            FileReceiveHandler = socketserver.BaseRequestHandler
-            global serverIP, serverPort
-            server = socketserver.TCPServer((bindIP, bindPort), FileReceiveHandler)
-            self.textLog.append('Start File Upload Server...\nIP: {0}:{1}\n'.format(bindIP, bindPort))
+            server = socketserver.TCPServer((uploadIP, uploadPort), FileReceiveHandler)
+            self.textLog.append('Start File Upload Server...\nIP: {0}:{1}\n'.format(uploadIP, uploadPort))
             self.textLog.moveCursor(QTextCursor.End)
             server.serve_forever()
         except Exception as err:
