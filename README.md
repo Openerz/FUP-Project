@@ -10,4 +10,4 @@
 - Windows, Linux support
 ### TO-DO
 - [ ] Thread stop function
-- [ ] Log messagebox function
+- [ ] Accept Messagebox function
