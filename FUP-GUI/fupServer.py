@@ -16,7 +16,6 @@ from PyQt5.QtGui import QTextCursor
 from PyQt5.QtWidgets import QApplication, QMainWindow, QInputDialog, QMessageBox, QFileDialog
 from PyQt5 import uic
 
-FileReceiveHandler = socketserver.BaseRequestHandler
 serverPort = 8080
 serverIP = '127.0.0.1'
 upload_dir = ''
@@ -25,7 +24,6 @@ _translate = QtCore.QCoreApplication.translate
 ui = 'fupServer.ui'
 
 class fupServer(QMainWindow):
-
     def __init__(self):
         super().__init__()
         uic.loadUi(ui, self)
@@ -51,11 +49,12 @@ class fupServer(QMainWindow):
             try:
                 serverPort = int(text)
                 self.label_port.setText(_translate("MainWindow", str(text)))
+
             except ValueError:
                 QMessageBox.critical(self, "Error", "Enter a number")
 
     def start(self):
-        t = Thread(target=self.serverStart, args=(upload_dir, serverIP, serverPort))
+        t = Thread(target=serverStart, args=(self, upload_dir, serverIP, serverPort))
         t.start()
 
     def stop(self):
@@ -71,12 +70,12 @@ class fupServer(QMainWindow):
             self.textLog.append('Exception has occurred.\n{0}\n'.format(err))
             self.textLog.moveCursor(QTextCursor.End)
 
-# class FileReceiveHandler(QMainWindow, socketserver.BaseRequestHandler):
-    def handle(self):
-        self.textLog.append('Client Connection : {0}'.format(self.client_address[0]))
-        self.textLog.moveCursor(QTextCursor.End)
 
-        client = self.request  # Client Socket
+class FileReceiveHandler(socketserver.BaseRequestHandler):
+    def handle(self):
+        print("Client Connection: {0}".format(self.client_address[0]))
+
+        client = self.request  # client socket
 
         reqMsg = MessageUtil.receive(client)  # Receive a file transfer request message sent by the client.
 
@@ -86,11 +85,8 @@ class fupServer(QMainWindow):
 
         reqBody = BodyRequest(None)
 
-        text, ok = QInputDialog.getText(self, 'Alert', 'Do you want to accept? (yes/no):')
-
-        if ok:
-            global answer
-            answer = str(text)
+        print("Do you want to accept? (yes / no):")
+        answer = sys.stdin.readline()
 
         rspMsg = Message()
         rspMsg.Body = BodyResponse(None)
@@ -119,8 +115,7 @@ class fupServer(QMainWindow):
         else:
             MessageUtil.send(client, rspMsg)  # Sends a "Accept" answer to the client when 'Yes' is entered.
 
-            self.textLog.append('Start file request...')
-            self.textLog.moveCursor(QTextCursor.End)
+            print("Start file request...")
 
             fileSize = reqMsg.Body.FILESIZE
             fileName = reqMsg.Body.FILENAME
@@ -134,8 +129,7 @@ class fupServer(QMainWindow):
                     if reqMsg == None:
                         break
 
-                    self.textLog.append('#', end='')
-                    self.textLog.moveCursor(QTextCursor.End)
+                    print("#", end='')
 
                     if reqMsg.Header.MSGTYPE != message.FILE_SEND_DATA:
                         break
@@ -145,9 +139,8 @@ class fupServer(QMainWindow):
                     elif dataMsgId != reqMsg.Header.MSGID:
                         break
 
-                    if prevSeq != reqMsg.Header.SEQ:  # Stop the if the message goes out of order
-                        self.textLog.append('{0}, {1}\n'.format(prevSeq, reqMsg.Header.SEQ))
-                        self.textLog.moveCursor(QTextCursor.End)
+                    if prevSeq != reqMsg.Header.SEQ:  # Stop the if the message goes out of order.
+                        print("{0}, {1}".format(prevSeq, reqMsg.Header.SEQ))
                         break
 
                     prevSeq += 1
@@ -160,8 +153,9 @@ class fupServer(QMainWindow):
 
                 file.close()
 
-                self.textLog.append('\nReceive file size : {0} bytes\n'.format(recvFileSize))
-                self.textLog.moveCursor(QTextCursor.End)
+                print()
+                print("Receive file size: {0} bytes".format(recvFileSize))
+
                 rstMsg = Message()
                 rstMsg.Body = BodyResult(None)
                 rstMsg.Body.MSGID = reqMsg.Header.MSGID
@@ -176,7 +170,7 @@ class fupServer(QMainWindow):
                 rstMsg.Header.LASTMSG = message.LASTMSG
                 rstMsg.Header.SEQ = 0
 
-                if fileSize == recvFileSize:  # Compare the size of the file in the file transfer request with
+                if fileSize == recvFileSize:  # Compare the size of the file in the file transfer request with \
                     MessageUtil.send(client, rstMsg) # the size of the file actually received and send a success message if.
                 else:
                     rstMsg.Body = BodyResult(None)
@@ -184,35 +178,34 @@ class fupServer(QMainWindow):
                     rstMsg.Body.RESULT = message.FAIL
                     MessageUtil.send(client, rstMsg)  # If there is a problem with the file size, send a failure message.
 
-            self.textLog.append('File transfer complete.\n')
-            self.textLog.moveCursor(QTextCursor.End)
+            print("File transfer complete.")
             client.close()
 
-    def serverStart(self, bindDir, bindIP, bindPort):
-        upload_Dir = bindDir
-        uploadIP = bindIP
-        uploadPort = bindPort
-        try:
-            if os.path.isdir(upload_Dir) == 0:
-                os.mkdir(upload_Dir)
-        except OSError as err:
-            self.textLog.append('Exception has occurred.\n{0}\n'.format(err))
-            self.textLog.moveCursor(QTextCursor.End)
-            pass
+def serverStart(self, bindDir, bindIP, bindPort):
+    upload_Dir = bindDir
+    uploadIP = bindIP
+    uploadPort = bindPort
+    try:
+        if os.path.isdir(upload_Dir) == 0:
+            os.mkdir(upload_Dir)
+    except OSError as err:
+        self.textLog.append('Exception has occurred.\n{0}\n'.format(err))
+        self.textLog.moveCursor(QTextCursor.End)
+        pass
 
-        server = 0
+    server = 0
 
-        try:
-            server = socketserver.TCPServer((uploadIP, uploadPort), FileReceiveHandler)
-            self.textLog.append('Start File Upload Server...\nIP: {0}:{1}\n'.format(uploadIP, uploadPort))
-            self.textLog.moveCursor(QTextCursor.End)
-            server.serve_forever()
-        except Exception as err:
-            print(err)
+    try:
+        server = socketserver.TCPServer((uploadIP, uploadPort), FileReceiveHandler)
+        self.textLog.append('Start File Upload Server...\nIP: {0}:{1}\n'.format(uploadIP, uploadPort))
+        self.textLog.moveCursor(QTextCursor.End)
+        server.serve_forever()
+    except Exception as err:
+        print(err)
 
-        print("The server finished.")
+    print("The server finished.")
 
 
-app = QApplication([])
+app = QApplication(sys.argv)
 ex = fupServer()
 sys.exit(app.exec())

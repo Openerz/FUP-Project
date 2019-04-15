@@ -36,7 +36,7 @@ if __name__ == '__main__':
         filesize = os.path.getsize(filepath)
         reqMsg.Body = BodyRequest(None)
         reqMsg.Body.FILESIZE = filesize
-        reqMsg.Body.FILENAME = filepath[filepath.rindex('\\') + 1:]
+        reqMsg.Body.FILENAME = os.path.basename(filepath)
 
         msgId += 1
         reqMsg.Header = Header(None)
@@ -59,7 +59,7 @@ if __name__ == '__main__':
             print("서버에서 파일 전송을 거부했습니다.")
             exit(0)
 
-        with open(filepath, 'rb') as file:  # 서버에서 전송 요청을 수락했다면, 파일을 열어 서버로 보낼 준비를 한다.
+        with open(os.path.relpath(filepath), 'rb') as file:  # 서버에서 전송 요청을 수락했다면, 파일을 열어 서버로 보낼 준비를 한다.
             totalRead = 0
             msgSeq = 0  # ushort
             fragmented = 0  # byte

@@ -20,7 +20,7 @@ class ISerializable:
     def GetBytes(self):  # Message, header, and body will inheritance all of this.
         pass            # Converts data to a byte array and returns the size of that byte array.
 
-    def GetSize(self):
+    def GetSize():
         pass
 
 

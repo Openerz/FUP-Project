@@ -50,19 +50,9 @@ class FupClient(QMainWindow):
     def openFile(self):
         global filepath
         fname = QFileDialog.getOpenFileName(self)
-        fName = ''
-        tmp = list(fname[0])
-        k = 0
-
-        for i in tmp: # Replace '/' with '\\'
-            if i == '/':
-                tmp[k] = '\\'
-            k += 1
-        for i in tmp:
-            fName += (str(i))
 
         self.lineEdit_file.setText(fname[0])
-        filepath = fName
+        filepath = fname[0]
 
     def upload(self):
         t = Thread(target=self.clientStart, args=(serverIP, serverPort, filepath))
@@ -77,17 +67,17 @@ class FupClient(QMainWindow):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # Create a TCP socket
 
         try:
-            self.textLog.append('Server: {0}:{1}\n'.format(startIP, startPort))
-            self.textLog.moveCursor(QTextCursor.End)
+            print("Server: {0}:{1}".format(startIP, startPort))
 
             sock.connect((startIP, startPort))  # Accept Connection Request
 
             msgId = 0
+
             reqMsg = Message()
             filesize = os.path.getsize(startPath)
             reqMsg.Body = BodyRequest(None)
             reqMsg.Body.FILESIZE = filesize
-            reqMsg.Body.FILENAME = startPath[startPath.rindex('\\') + 1:]
+            reqMsg.Body.FILENAME = os.path.basename(startPath)
 
             msgId += 1
             reqMsg.Header = Header(None)
@@ -98,24 +88,22 @@ class FupClient(QMainWindow):
             reqMsg.Header.LASTMSG = message.LASTMSG
             reqMsg.Header.SEQ = 0
 
-            MessageUtil.send(sock, reqMsg) # Connect to the server, the client sends a file transfer request message.
+            MessageUtil.send(sock, reqMsg)  # Connect to the server, the client sends a file transfer request message.
             rspMsg = MessageUtil.receive(sock)  # Receive a response from the server
 
             if rspMsg.Header.MSGTYPE != message.REP_FILE_SEND:
-                self.textLog.append('This is not a normal server response.\n{0}\n'.format(rspMsg.Header.MSGTYPE))
-                self.textLog.moveCursor(QTextCursor.End)
+                print("his is not a normal server response.{0}".
+                      format(rspMsg.Header.MSGTYPE))
                 exit(0)
 
             if rspMsg.Body.RESPONSE == message.DENIED:
-                self.textLog.append('The server refused to send the file.\n')
-                self.textLog.moveCursor(QTextCursor.End)
+                print("The server refused to send the file.")
                 exit(0)
 
-            with open(startPath, 'rb') as file:  # Prepare to open the file and send it to the server.
+            with open(os.path.relpath(startPath), 'rb') as file:  # Prepare to open the file and send it to the server.
                 totalRead = 0
                 msgSeq = 0  # ushort
                 fragmented = 0  # byte
-
                 if filesize < CHUNK_SIZE:
                     fragmented = message.NOT_FRAGMENTED
                 else:
@@ -142,24 +130,21 @@ class FupClient(QMainWindow):
                     msgSeq += 1
 
                     fileMsg.Header = header
-                    self.textLog.append('#', end='')
-                    self.textLog.moveCursor(QTextCursor.End)
+                    print("#", end='')
 
                     MessageUtil.send(sock, fileMsg)
-                self.textLog.append('')
+
+                print()
 
                 rstMsg = MessageUtil.receive(sock)  # Get a receive to see if it's been sent properly
+
                 result = rstMsg.Body
-                self.textLog.append('File Receive Success: {0}\n'.format(result.RESULT == message.SUCCESS))
-                self.textLog.moveCursor(QTextCursor.End)
+                print("File Receive Success: {0}".
+                      format(result.RESULT == message.SUCCESS))
 
         except Exception as err:
-            self.textLog.append('Exception has occurred.\n{0}\n'.format(err))
-            self.textLog.moveCursor(QTextCursor.End)
-
-        sock.close()
-        self.textLog.append('The client finished.\n')
-        self.textLog.moveCursor(QTextCursor.End)
+            print("Exception has occurred.")
+            print(err)
 
 app = QApplication(sys.argv)
 ex = FupClient()
