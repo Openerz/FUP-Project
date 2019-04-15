@@ -9,7 +9,7 @@ from message_body import BodyResult
 
 class MessageUtil:
     @staticmethod
-    def send(sock, msg):  # send() 메소드는 msg 매개변수가 담고 있는 모든 바이트를 내보낼 때까지 반복해서 socket.send() 메소드를 호출한다.
+    def send(sock, msg):  # The send() method calls the socket.send() method repeatedly until all bytes containing the msg parameter are exported.
         sent = 0
         buffer = msg.GetBytes()
         while sent < msg.GetSize():
@@ -21,8 +21,8 @@ class MessageUtil:
         sizeToRead = 16  # Header Size
         hBuffer = bytes()  # Header Buffer
 
-        # 헤더 읽기
-        while sizeToRead > 0:  # 첫 반복문에서는 스트림으로부터 메세지 헤더의 경계를 끊어낸다.
+        # Read Header
+        while sizeToRead > 0:  # In the first loop, the boundary of the message header is cut from the stream.
             buffer = sock.recv(sizeToRead)
             if len(buffer) == 0:
                 return None

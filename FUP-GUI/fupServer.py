@@ -27,10 +27,6 @@ class fupServer(QMainWindow):
     def __init__(self):
         super().__init__()
         uic.loadUi(ui, self)
-        self.initUI()
-
-    def initUI(self):
-        self.show()
 
     def setIP(self):
         text, ok = QInputDialog.getText(self, 'Setting', 'IP:')
@@ -54,7 +50,7 @@ class fupServer(QMainWindow):
                 QMessageBox.critical(self, "Error", "Enter a number")
 
     def start(self):
-        t = Thread(target=serverStart, args=(self, upload_dir, serverIP, serverPort))
+        t = Thread(target=serverStart, args=(self, serverIP, serverPort, upload_dir))
         t.start()
 
     def stop(self):
@@ -73,7 +69,8 @@ class fupServer(QMainWindow):
 
 class FileReceiveHandler(socketserver.BaseRequestHandler):
     def handle(self):
-        print("Client Connection: {0}".format(self.client_address[0]))
+        ex.textLog.append('[-] Client Connection: {0}'.format(self.client_address[0]))
+        ex.textLog.moveCursor(QTextCursor.End)
 
         client = self.request  # client socket
 
@@ -115,12 +112,14 @@ class FileReceiveHandler(socketserver.BaseRequestHandler):
         else:
             MessageUtil.send(client, rspMsg)  # Sends a "Accept" answer to the client when 'Yes' is entered.
 
-            print("Start file request...")
+            ex.textLog.append('Start file request...')
+            ex.textLog.moveCursor(QTextCursor.End)
 
             fileSize = reqMsg.Body.FILESIZE
             fileName = reqMsg.Body.FILENAME
             recvFileSize = 0
             with open(upload_dir + "\\" + fileName, 'wb') as file:  # Create an upload file.
+                fragmentedCnt = 0
                 dataMsgId = -1
                 prevSeq = 0
 
@@ -128,8 +127,6 @@ class FileReceiveHandler(socketserver.BaseRequestHandler):
                     reqMsg = MessageUtil.receive(client)
                     if reqMsg == None:
                         break
-
-                    print("#", end='')
 
                     if reqMsg.Header.MSGTYPE != message.FILE_SEND_DATA:
                         break
@@ -140,9 +137,11 @@ class FileReceiveHandler(socketserver.BaseRequestHandler):
                         break
 
                     if prevSeq != reqMsg.Header.SEQ:  # Stop the if the message goes out of order.
-                        print("{0}, {1}".format(prevSeq, reqMsg.Header.SEQ))
+                        ex.textLog.append('{0}, {1}\n'.format(prevSeq, reqMsg.Header.SEQ))
+                        ex.textLog.moveCursor(QTextCursor.End)
                         break
 
+                    fragmentedCnt += 1
                     prevSeq += 1
 
                     recvFileSize += reqMsg.Body.GetSize()  # Record the byte object some of the transferred files in a file created by the server.
@@ -151,10 +150,13 @@ class FileReceiveHandler(socketserver.BaseRequestHandler):
                     if reqMsg.Header.LASTMSG == message.LASTMSG:  # The last message is out of the loop.
                         break
 
+                ex.textLog.append('')
                 file.close()
 
-                print()
-                print("Receive file size: {0} bytes".format(recvFileSize))
+                ex.textLog.append('# Fragmented count: {0}'.format(fragmentedCnt))
+                ex.textLog.moveCursor(QTextCursor.End)
+                ex.textLog.append('Receive file size : {0} bytes\n'.format(recvFileSize))
+                ex.textLog.moveCursor(QTextCursor.End)
 
                 rstMsg = Message()
                 rstMsg.Body = BodyResult(None)
@@ -178,13 +180,14 @@ class FileReceiveHandler(socketserver.BaseRequestHandler):
                     rstMsg.Body.RESULT = message.FAIL
                     MessageUtil.send(client, rstMsg)  # If there is a problem with the file size, send a failure message.
 
-            print("File transfer complete.")
+            ex.textLog.append('File transfer complete.\n')
+            ex.textLog.moveCursor(QTextCursor.End)
             client.close()
 
-def serverStart(self, bindDir, bindIP, bindPort):
-    upload_Dir = bindDir
+def serverStart(self, bindIP, bindPort, bindDir):
     uploadIP = bindIP
     uploadPort = bindPort
+    upload_Dir = bindDir
     try:
         if os.path.isdir(upload_Dir) == 0:
             os.mkdir(upload_Dir)
@@ -193,11 +196,10 @@ def serverStart(self, bindDir, bindIP, bindPort):
         self.textLog.moveCursor(QTextCursor.End)
         pass
 
-    server = 0
-
     try:
         server = socketserver.TCPServer((uploadIP, uploadPort), FileReceiveHandler)
-        self.textLog.append('Start File Upload Server...\nIP: {0}:{1}\n'.format(uploadIP, uploadPort))
+        self.textLog.append('Start File Upload Server...')
+        self.textLog.append('IP: {0}:{1}\n'.format(uploadIP, uploadPort))
         self.textLog.moveCursor(QTextCursor.End)
         server.serve_forever()
     except Exception as err:
@@ -205,7 +207,8 @@ def serverStart(self, bindDir, bindIP, bindPort):
 
     print("The server finished.")
 
-
 app = QApplication(sys.argv)
 ex = fupServer()
+ex.show()
+
 sys.exit(app.exec())

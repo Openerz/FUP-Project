@@ -67,7 +67,8 @@ class FupClient(QMainWindow):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # Create a TCP socket
 
         try:
-            print("Server: {0}:{1}".format(startIP, startPort))
+            self.textLog.append('[-] Server: {0}:{1}\n'.format(startIP, startPort))
+            self.textLog.moveCursor(QTextCursor.End)
 
             sock.connect((startIP, startPort))  # Accept Connection Request
 
@@ -92,18 +93,20 @@ class FupClient(QMainWindow):
             rspMsg = MessageUtil.receive(sock)  # Receive a response from the server
 
             if rspMsg.Header.MSGTYPE != message.REP_FILE_SEND:
-                print("his is not a normal server response.{0}".
-                      format(rspMsg.Header.MSGTYPE))
+                self.textLog.append('This is not a normal server response.\n{0}\n'.format(rspMsg.Header.MSGTYPE))
+                self.textLog.moveCursor(QTextCursor.End)
                 exit(0)
 
             if rspMsg.Body.RESPONSE == message.DENIED:
-                print("The server refused to send the file.")
+                self.textLog.append('The server refused to send the file.\n')
+                self.textLog.moveCursor(QTextCursor.End)
                 exit(0)
 
             with open(os.path.relpath(startPath), 'rb') as file:  # Prepare to open the file and send it to the server.
                 totalRead = 0
                 msgSeq = 0  # ushort
                 fragmented = 0  # byte
+                fragmentedCnt = 0
                 if filesize < CHUNK_SIZE:
                     fragmented = message.NOT_FRAGMENTED
                 else:
@@ -129,24 +132,30 @@ class FupClient(QMainWindow):
                     header.SEQ = msgSeq
                     msgSeq += 1
 
-                    fileMsg.Header = header
-                    print("#", end='')
+                    fragmentedCnt += 1
 
+                    fileMsg.Header = header
                     MessageUtil.send(sock, fileMsg)
 
-                print()
+                self.textLog.append('# Fragmented count: {0}'.format(fragmentedCnt))
+                self.textLog.moveCursor(QTextCursor.End)
 
                 rstMsg = MessageUtil.receive(sock)  # Get a receive to see if it's been sent properly
 
                 result = rstMsg.Body
-                print("File Receive Success: {0}".
-                      format(result.RESULT == message.SUCCESS))
+                self.textLog.append('File Receive Success: {0}\n'.format(result.RESULT == message.SUCCESS))
+                self.textLog.moveCursor(QTextCursor.End)
 
         except Exception as err:
-            print("Exception has occurred.")
-            print(err)
+            self.textLog.append('Exception has occurred.\n{0}\n'.format(err))
+            self.textLog.moveCursor(QTextCursor.End)
+
+        sock.close()
+        self.textLog.append('The client finished.\n')
+        self.textLog.moveCursor(QTextCursor.End)
 
 app = QApplication(sys.argv)
 ex = FupClient()
 ex.show()
+
 sys.exit(app.exec())
